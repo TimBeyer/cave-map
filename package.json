@@ -1,0 +1,39 @@
+{
+  "name": "cave-map",
+  "version": "1.0.0",
+  "description": "Mapping tools for 3d cave exploration and scanning",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server --inline --open"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TimBeyer/cave-map.git"
+  },
+  "keywords": [],
+  "author": "Huang Qi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TimBeyer/cave-map/issues"
+  },
+  "homepage": "https://github.com/TimBeyer/cave-map#readme",
+  "devDependencies": {
+    "awesome-typescript-loader": "latest",
+    "css-loader": "latest",
+    "file-loader": "^6.0.0",
+    "html-webpack-plugin": "latest",
+    "image-webpack-loader": "^6.0.0",
+    "progress-bar-webpack-plugin": "latest",
+    "style-loader": "latest",
+    "typescript": "latest",
+    "webpack": "latest",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "latest",
+    "worker-loader": "^2.0.0"
+  },
+  "dependencies": {
+    "three": "latest",
+    "three-stl-loader": "^1.0.6"
+  }
+}
