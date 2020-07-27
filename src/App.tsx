@@ -6,26 +6,11 @@ import Dropzone from 'react-dropzone'
 import * as THREE from 'three';
 import { MapPlane } from './components/MapPlane';
 import { MapPiece } from './components/MapPiece';
-import { extend, useThree } from 'react-three-fiber'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-extend({ OrbitControls })
+import { ControlMode } from './control-mode'
 
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'orbitControls': ReactThreeFiber.Object3DNode<OrbitControls, typeof OrbitControls>;
-    }
-  }
-}
-
-function Controls () {
-  const controls = useRef<OrbitControls>()
-  const { scene, camera, gl } = useThree()
-  useFrame(() => controls.current?.update())
-  return (
-    <orbitControls ref={controls} args={[camera, gl.domElement]} enableDamping dampingFactor={0.1} rotateSpeed={0.5} />
-  )
-}
+import { Camera } from './components/Camera';
+import { Controls } from './components/Controls';
+import { useStore } from './state';
 
 interface LoadedSTL {
   fileName: string
@@ -52,13 +37,19 @@ function App () {
     reader.readAsDataURL(new Blob([file]));
   }, [])
 
+  const { controlMode, setControlMode } = useStore()
+
   return (
     <Dropzone onDrop={onDrop}>
       {({ getRootProps, getInputProps }) => (
         <div {...getRootProps()}>
+          <div style={{ zIndex: 9000, padding: '1em', background: 'white', position: 'absolute', top: '5vh', right: '5vw'}}>
+            <p>Current mode: {controlMode}</p>
+            <button onClick={() => setControlMode(ControlMode.EDIT)}>Edit</button>
+            <button onClick={() => setControlMode(ControlMode.EXPLORE)}>Explore</button>
+          </div>
           <Canvas
             style={{ background: 'black', height: '100vh' }}
-            camera={{ position: [0, 1000, 0], fov: 75, far: 5000, near: 0.1 }}
             onCreated={({ camera }) => camera.lookAt(0, 0, 0)}
           >
             <directionalLight position={[0, 100, 0]} color={0xffffff} intensity={1.0} />
@@ -69,6 +60,7 @@ function App () {
               ))}
             </Suspense>
             <Controls />
+            <Camera position={[0, 1000, 0]} />
           </Canvas>
         </div>
       )}
