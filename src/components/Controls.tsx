@@ -3,16 +3,17 @@ import { extend, useThree, useFrame, ReactThreeFiber, useResource } from "react-
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { DragControls } from 'three/examples/jsm/controls/DragControls';
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import { ControlMode } from "../control-mode"
 import { useStore, storeApi } from "../state";
-extend({ OrbitControls })
-extend({ DragControls })
+extend({ OrbitControls, DragControls, TransformControls })
 
 declare global {
   namespace JSX {
     interface IntrinsicElements {
       'orbitControls': ReactThreeFiber.Object3DNode<OrbitControls, typeof OrbitControls>;
       'dragControls': ReactThreeFiber.Object3DNode<DragControls, typeof DragControls>;
+      'transformControls': ReactThreeFiber.Object3DNode<TransformControls, typeof TransformControls>;
     }
   }
 }
@@ -24,11 +25,7 @@ export const Controls: React.FC = () => {
 
   useFrame(() => controls.update())
 
-  const { isRepositioningMapPiece } = useStore()
-
-  useEffect(() => {
-    console.log(isRepositioningMapPiece)
-  }, [isRepositioningMapPiece])
+  const isRepositioningMapPiece = useStore((state) => state.isRepositioningMapPiece)
 
   return (
     <orbitControls
