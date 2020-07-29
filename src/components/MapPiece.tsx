@@ -11,7 +11,7 @@ import { useStore, storeApi } from '../state'
 import { start } from 'repl';
 import { useLocalStorage } from '../hooks';
 
-const CAVE_GEOMETRY_SCALE_FACTOR = 5;
+const CAVE_GEOMETRY_SCALE_FACTOR = 5.1;
 
 function useRepositioningEffect <T extends EventDispatcher>(control: T, onStart: () => void, onStop: () => void) {
   useEffect(() => {
