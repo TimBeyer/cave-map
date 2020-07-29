@@ -68,7 +68,6 @@ export const MapPiece: React.FC<{ fileName: string, dataUrl: string }> = (props)
   const [dragControlRef, dragControl] = useResource<DragControls>()
   const [transformControlRef, transformControl] = useResource<DragControls>()
   // const dragControlRef = useRef<DragControls>()
-  const controlMode = useStore((state) => state.controlMode)
   const { camera, gl } = useThree()
 
   useFrame(() => box && box.update())
@@ -78,7 +77,7 @@ export const MapPiece: React.FC<{ fileName: string, dataUrl: string }> = (props)
     setMeshState([mesh])
   }, [mesh])
 
-  const { onRepositioningMapPieceStart, onRepositioningMapPieceStop } = useStore()
+  const { onRepositioningMapPieceStart, onRepositioningMapPieceStop, controlMode } = useStore()
 
   useRepositioningEffect(
     dragControl,
@@ -92,23 +91,24 @@ export const MapPiece: React.FC<{ fileName: string, dataUrl: string }> = (props)
     onRepositioningMapPieceStop
   )
 
+  const isEditMode = controlMode === ControlMode.EDIT
 
   return (
     <React.Fragment key={props.fileName}>
-      <dragControls
+      { isEditMode && <dragControls
         ref={dragControlRef}
-        enabled={controlMode === ControlMode.EDIT}
+        enabled={isEditMode}
         args={[meshState, camera, gl.domElement]}
-      />
-      <transformControls
+      />}
+      { isEditMode && <transformControls
         ref={transformControlRef}
         mode="rotate"
         object={mesh}
         showX={false}
-        showY={controlMode === ControlMode.EDIT}
+        showY={isEditMode}
         showZ={false}
         args={[camera, gl.domElement]}
-      />
+      />}
       <group ref={groupRef}>
         <mesh ref={meshRef} geometry={geometry} scale={[CAVE_GEOMETRY_SCALE_FACTOR, CAVE_GEOMETRY_SCALE_FACTOR, CAVE_GEOMETRY_SCALE_FACTOR]}>
           <meshPhongMaterial attach="material" color={0xffffff} side={THREE.DoubleSide} />
