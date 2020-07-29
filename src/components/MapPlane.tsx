@@ -12,7 +12,11 @@ export const MapPlane: React.FC = (props) => {
   const meshRef = useRef<THREE.Mesh>()
   const texture = useLoader(THREE.TextureLoader, baseMap)
   return (
-    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, Math.PI / 2]}>
+    <mesh
+      ref={meshRef}
+      rotation={[-Math.PI / 2, 0, Math.PI / 2]}
+      position={[0, -100, 0]}
+    >
       <planeGeometry attach="geometry" args={[MAP_WIDTH, MAP_HEIGHT]} />
       <meshBasicMaterial
         attach="material"
