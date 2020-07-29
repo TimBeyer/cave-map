@@ -9,6 +9,7 @@ import { TransformControls } from 'three/examples/jsm/controls/TransformControls
 
 import { useStore, storeApi } from '../state'
 import { start } from 'repl';
+import { useLocalStorage } from '../hooks';
 
 const CAVE_GEOMETRY_SCALE_FACTOR = 5;
 
@@ -35,30 +36,38 @@ function useRepositioningEffect <T extends EventDispatcher>(control: T, onStart:
   }, [control, onStart, onStop])
 }
 
-function useRotateEffect <T extends EventDispatcher>(control: T, onStart: () => void, onStop: () => void) {
+function useRotateEffect <T extends EventDispatcher>(control: T, onStart: (event: THREE.Event) => void, onStop: (event: THREE.Event) => void) {
   useEffect(() => {
     if (!control) {
       return
     }
 
-    const startHandler = () => {
-      onStart()
+    const startHandler = (event: THREE.Event) => {
+      onStart(event)
     }
 
-    const stopHandler = () => {
-      onStop()
+    const stopHandler = (event: THREE.Event) => {
+      onStop(event)
     }
 
     control.addEventListener('mouseDown', startHandler)
     control.addEventListener('mouseUp', stopHandler)
     return () => {
-      control.removeEventListener('dragstart', startHandler)
-      control.removeEventListener('dragend', stopHandler)
+      control.removeEventListener('mouseDown', startHandler)
+      control.removeEventListener('mouseUp', stopHandler)
     }
   }, [control, onStart, onStop])
 }
 
 const STLLoader = _STLLoader(THREE);
+
+type Position = [number, number, number]
+type Rotation = {
+  x: number,
+  y: number,
+  z: number,
+  order?: string
+}
 
 export const MapPiece: React.FC<{ fileName: string, dataUrl: string }> = (props) => {
   const geometry = useLoader<THREE.Geometry>(STLLoader, props.dataUrl)
@@ -67,8 +76,16 @@ export const MapPiece: React.FC<{ fileName: string, dataUrl: string }> = (props)
   const [boxRef, box] = useResource<BoxHelper>()
   const [dragControlRef, dragControl] = useResource<DragControls>()
   const [transformControlRef, transformControl] = useResource<DragControls>()
-  // const dragControlRef = useRef<DragControls>()
   const { camera, gl } = useThree()
+  const [position, setPosition] = useLocalStorage<Position>(`position:${props.fileName}`, [0, 0, 0])
+  const [rotation, setRotation] = useLocalStorage<Rotation>(
+    `rotation:${props.fileName}`,
+    {
+      x: 0,
+      y: 0,
+      z: 0
+    }
+  );
 
   useFrame(() => box && box.update())
 
@@ -82,13 +99,26 @@ export const MapPiece: React.FC<{ fileName: string, dataUrl: string }> = (props)
   useRepositioningEffect(
     dragControl,
     onRepositioningMapPieceStart,
-    onRepositioningMapPieceStop
+    () => {
+      onRepositioningMapPieceStop()
+      setPosition([mesh.position.x, mesh.position.y, mesh.position.z]);
+    }
   )
 
   useRotateEffect(
     transformControl,
     onRepositioningMapPieceStart,
-    onRepositioningMapPieceStop
+    () => {
+      const rotation = {
+        x: mesh.rotation.x,
+        y: mesh.rotation.y,
+        z: mesh.rotation.z,
+        order: mesh.rotation.order,
+      };
+      console.log(rotation)
+      onRepositioningMapPieceStop()
+      setRotation(rotation);
+    }
   )
 
   const isEditMode = controlMode === ControlMode.EDIT
@@ -110,7 +140,7 @@ export const MapPiece: React.FC<{ fileName: string, dataUrl: string }> = (props)
         args={[camera, gl.domElement]}
       />}
       <group ref={groupRef}>
-        <mesh ref={meshRef} geometry={geometry} scale={[CAVE_GEOMETRY_SCALE_FACTOR, CAVE_GEOMETRY_SCALE_FACTOR, CAVE_GEOMETRY_SCALE_FACTOR]}>
+        <mesh rotation={new THREE.Euler(rotation.x, rotation.y, rotation.z, rotation.order)} position={position} ref={meshRef} geometry={geometry} scale={[CAVE_GEOMETRY_SCALE_FACTOR, CAVE_GEOMETRY_SCALE_FACTOR, CAVE_GEOMETRY_SCALE_FACTOR]}>
           <meshPhongMaterial attach="material" color={0xffffff} side={THREE.DoubleSide} />
         </mesh>
         {mesh && controlMode === ControlMode.EDIT && <boxHelper ref={boxRef} args={[mesh]} />}
