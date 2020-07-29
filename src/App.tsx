@@ -21,20 +21,21 @@ function App () {
   const [loadedStlFiles, setLoadedStlFiles] = useState<LoadedSTL[]>([])
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0]
-    const reader = new FileReader();
-    reader.onload = function () {
-      const dataUrl = reader.result as string
-
-      const loadedStlFile: LoadedSTL = {
-        fileName: file.name,
-        dataUrl
-      }
-
-      setLoadedStlFiles((alreadyLoaded) => [...alreadyLoaded, loadedStlFile])
-    };
-
-    reader.readAsDataURL(new Blob([file]));
+    for (const file of acceptedFiles) {
+      const reader = new FileReader();
+      reader.onload = function () {
+        const dataUrl = reader.result as string
+  
+        const loadedStlFile: LoadedSTL = {
+          fileName: file.name,
+          dataUrl
+        }
+  
+        setLoadedStlFiles((alreadyLoaded) => [...alreadyLoaded, loadedStlFile])
+      };
+  
+      reader.readAsDataURL(new Blob([file]));
+    }
   }, [])
 
   const { controlMode, setControlMode } = useStore()
